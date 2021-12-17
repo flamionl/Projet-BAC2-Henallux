@@ -83,6 +83,12 @@ int command_handler(char * command,int sockid, int client_socket)
         recv(client_socket, (char *)buffer, 2048, 0);
         printf("%s\n", buffer);
     }
+    else if (strncmp(command,"cd",2) == 0)
+    {
+        send(client_socket, (const char *)command, strlen(command),0);
+        recv(client_socket, (char *)buffer, 2048, 0);
+        printf("%s\n", buffer);
+    }
     else 
     {
         printf("command not found type h for help\n");
