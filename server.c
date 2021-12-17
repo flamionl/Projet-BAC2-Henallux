@@ -59,33 +59,48 @@ void usage()
 
 int command_handler(char * command,int sockid, int client_socket)
 {
-    char buffer[512];
+
     if (strncmp(command,"h",1) == 0)
     {
         usage();
     }
     else if(strncmp(command,"ls",2) == 0)
     {   
-        
-        send(client_socket, (const char *)command, strlen(command),0);
+        char buffer[2048];
+        send(client_socket, (const char *)command, strlen(command)+1,0);
+        strcpy(buffer,"");
         recv(client_socket, (char *)buffer, 2048, 0 );
         printf("%s\n", buffer);
     }
     else if (strncmp(command,"enc",3) == 0)
     {
-        send(client_socket, (const char *)command, strlen(command),0);
+        char buffer[2048];
+        send(client_socket, (const char *)command, strlen(command)+1,0);
+        strcpy(buffer,"");
         recv(client_socket, (char *)buffer, 2048, 0);
         printf("%s\n", buffer);
     }
     else if (strncmp(command,"dec",3) == 0)
     {
-        send(client_socket, (const char *)command, strlen(command),0);
+        char buffer[2048];
+        send(client_socket, (const char *)command, strlen(command)+1,0);
+        strcpy(buffer,"");
         recv(client_socket, (char *)buffer, 2048, 0);
         printf("%s\n", buffer);
     }
     else if (strncmp(command,"cd",2) == 0)
     {
-        send(client_socket, (const char *)command, strlen(command),0);
+        char buffer[2048];
+        send(client_socket, (const char *)command, strlen(command)+1,0);
+        strcpy(buffer,"");
+        recv(client_socket, (char *)buffer, 2048, 0);
+        printf("%s\n", buffer);
+    }
+    else if (strncmp(command,"pwd",3) == 0)
+    {
+        char buffer[2048];
+        send(client_socket, (const char *)command, strlen(command)+1,0);
+        strcpy(buffer,"");
         recv(client_socket, (char *)buffer, 2048, 0);
         printf("%s\n", buffer);
     }
