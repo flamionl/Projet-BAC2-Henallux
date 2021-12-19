@@ -24,6 +24,11 @@ int main (int argc, char * argv[])
     char *server_ip = "10.0.0.2";
 
     sockid = socket(AF_INET, SOCK_STREAM,0);
+    if (sockid <0)
+    {
+        printf("Error when creating socket\n");
+        abort();
+    }
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
@@ -35,13 +40,30 @@ int main (int argc, char * argv[])
     client_addr.sin_port = htons(5555);
     client_addr.sin_addr.s_addr = inet_addr("10.0.0.1");
 
-    bind(sockid, (struct sockaddr *)&client_addr, sizeof(client_addr));
-    connect(sockid, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (bind(sockid, (struct sockaddr *)&client_addr, sizeof(client_addr))<0)
+    {
+        printf("Error during binding\n");
+        printf("%s", strerror(errno));
+        abort();
+    }
+    if (connect(sockid, (struct sockaddr *)&server_addr, sizeof(server_addr))!=0)
+    {
+        printf("Error during connection\n");
+        printf("%s", strerror(errno));
+        abort();
+    }
 	
     while(1) 
     {
+        int status;
         char command[512];
-        recv(sockid, command, 512, 0);
+        status = recv(sockid, command, 512, 0);
+        if (status<=0)
+        {
+            printf("Connection shutdown\n");
+            printf("%s\n", strerror(errno));
+            abort();
+        }
         
 
         if(strncmp(command,"ls",2) == 0)   //Handle ls command
