@@ -83,11 +83,11 @@ void usage()
 int command_handler(char * command,int sockid, int client_socket)
 {
 
-    if (strncmp(command,"h",1) == 0)
+    if (strncmp(command,"h",1) == 0 && strlen(command) == 2)
     {
         usage();
     }
-    else if(strncmp(command,"ls",2) == 0)
+    else if(strncmp(command,"ls",2) == 0 && strlen(command)==3)
     {   
         char buffer[2048];
         int status;
@@ -106,7 +106,7 @@ int command_handler(char * command,int sockid, int client_socket)
 
         printf("%s\n", buffer);
     }
-    else if (strncmp(command,"enc",3) == 0)
+    else if (strncmp(command,"enc",3) == 0 && strlen(command) == 4)
     {
         char buffer[2048];
         int status;
@@ -140,7 +140,7 @@ int command_handler(char * command,int sockid, int client_socket)
         }
         printf("%s\n", buffer);
     }
-    else if (strncmp(command,"cd",2) == 0)
+    else if (strncmp(command,"cd ",3) == 0)
     {
         char buffer[2048];
         int status;
@@ -157,7 +157,7 @@ int command_handler(char * command,int sockid, int client_socket)
         }
         printf("%s\n", buffer);
     }
-    else if (strncmp(command,"pwd",3) == 0)
+    else if (strncmp(command,"pwd",3) == 0 && strlen(command) == 4)
     {
         char buffer[2048];
         int status;
@@ -174,14 +174,18 @@ int command_handler(char * command,int sockid, int client_socket)
         }
         printf("%s\n", buffer);
     }
-    else if (strncmp(command,"clear",5) == 0)
+    else if (strncmp(command,"clear",5 ) == 0 && strlen(command) == 6)
     {
         system("/bin/clear"); 
     }
-    else if (strncmp(command,"exit",4) == 0) 
+    else if (strncmp(command,"exit",4) == 0 && strlen(command) == 5)  
     {
         close(sockid);
         exit(0);
+    }
+    else if (strncmp(command, "cd", 2) ==0 && strlen(command) == 3)
+    {
+        printf("Usage : cd <directory>\n");
     }
     else 
     {

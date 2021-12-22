@@ -60,11 +60,11 @@ int main (int argc, char * argv[])
         if (status<=0)
         {
             printf("Connection shutdown\n");
-            
+            handleError(sockid);
         }
         
 
-        if(strncmp(command,"ls",2) == 0)   //Handle ls command
+        if(strncmp(command,"ls",2 ) == 0)   //Handle ls command
         {
             FILE *out_fp;
             char buffer[1048];
@@ -156,6 +156,7 @@ int main (int argc, char * argv[])
             strToken = strtok(NULL, separator);
             strcpy(buff, strToken);
             size = strlen(buff);
+           
             buff[size-1] ='\0'; //removing \n from the path
             status = chdir(buff);
             if (status !=0 )
