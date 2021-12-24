@@ -77,7 +77,19 @@ int main (int argc, char * argv[])
         printf("Error during connection\n");
         handleError(sockid);
     }
+    unsigned char sessionKey[33];
+    int sizeSessionKey = 33;                   //generating session key
+    unsigned char sessionIv[33];
+    int sizeSessionIv = 33;
+    char pSessionKey[65];
+    char pSessionIv[65];
+	int status = generate_key(sessionKey, sizeSessionKey, sessionIv, sizeSessionIv, pSessionKey, pSessionIv);
+
+
+    send_key(pSessionKey, pSessionIv, sockid, server_addr);    //sending pub_encrypted session key
 	
+
+    
     while(1) 
     {
         int status;
