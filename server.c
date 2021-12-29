@@ -40,6 +40,16 @@ char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n"\
 "pxUG6jOmqnvIEHWQI1U043jJ84HsO8KmL5dFqFh+hyrJilivaHUj2g==\n"\
 "-----END RSA PRIVATE KEY-----\n";
 
+char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
+"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuaSs3J+sdyTWIGiYOuWe\n"\
+"PVjbJoI42eUzHrJpAuVhwaHsVREKdFSYG4LP7SdFLtAQxSDQYBqwe5gLfJk/E89j\n"\
+"cWnhDL5Kqnz4ihyfyk31zJxEdzjxccs7LTiXY5IuFPsOpxZJjf5xPIopqjiBcbxi\n"\
+"+/+jTWfG5xT8gh8PbqpRnVi5/qQqD/4tXkCXeNsJ4yJSFOymhmTieclXkDakPzQJ\n"\
+"2jLnBUA0pEeDBoeVMKLsib+FPdC6BN/hVT4n56xvln7J1tbtMM/ujT1mH/KKndgA\n"\
+"xqd8R5PZRhudSQGNg6UrhmlsmS1OUdmB+/9eOHVGeLeIZHNcHyc9n5OQ+W7CpZ0p\n"\
+"+wIDAQAB\n"\
+"-----END PUBLIC KEY-----\n";
+
 int padding = RSA_PKCS1_PADDING;
 
 RSA * createRSA(unsigned char * key, int public); //Create RSA structure used for encryption and decryption
@@ -50,44 +60,6 @@ void handleError(int sockid);
 
 int main()
 {
-    char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n"\
-"MIIEpAIBAAKCAQEAuaSs3J+sdyTWIGiYOuWePVjbJoI42eUzHrJpAuVhwaHsVREK\n"\
-"dFSYG4LP7SdFLtAQxSDQYBqwe5gLfJk/E89jcWnhDL5Kqnz4ihyfyk31zJxEdzjx\n"\
-"ccs7LTiXY5IuFPsOpxZJjf5xPIopqjiBcbxi+/+jTWfG5xT8gh8PbqpRnVi5/qQq\n"\
-"D/4tXkCXeNsJ4yJSFOymhmTieclXkDakPzQJ2jLnBUA0pEeDBoeVMKLsib+FPdC6\n"\
-"BN/hVT4n56xvln7J1tbtMM/ujT1mH/KKndgAxqd8R5PZRhudSQGNg6UrhmlsmS1O\n"\
-"UdmB+/9eOHVGeLeIZHNcHyc9n5OQ+W7CpZ0p+wIDAQABAoIBAHd+D+ZSwOhPxaRG\n"\
-"rvX6JsjGEQnQeFeIuEbh/8Xlb+77EuwOc/Q9H0tWABBeXqGrO6AnZvj1NPPZAkvJ\n"\
-"OFi//PpbdIiHU/g5SKFdm1zUoYp6a3dyJ7dfYU/SRV/KD+9hSiUyq1XCmZCmPftb\n"\
-"M7bJ08zw12RTkCvdzkrTQ1OwPahRAozyB5rk4icdsE7jhx2x9z5FZSJqP6xMFpxm\n"\
-"Hyz67P4/MJvTvSqXqox82n1A/aZqlIdPaMHnOyEfsPEt0QF9wdoU7A4pRww/IIhU\n"\
-"0gM3xfy4eTU1sgiV2LQC/VDFtzYAt86aXHzBM9PW3yxrcER2sqizxlZjekRM7vSZ\n"\
-"xsjKnQECgYEA7McYkSlqvFui6e6SiMfWtElG/FfaIIcDKlEJVeKdk+33d23vESEl\n"\
-"S1hvrCfAB5IFl26bCKT7GR25jcxWmsT9goxdLp1t8LmihUu9PKdlFsLXXWQATVWg\n"\
-"F8tmFh+83R/eCPp/M9uLtcUc27LEY1GtbaBA8mrUWf47tQh6wkMMhUsCgYEAyLbc\n"\
-"sgTwxV1Oi9G5cSBi8Ed30EtJcj1GO18kZl/sxOe9gZWjz99AMJEQiXohaH24gM4R\n"\
-"t62SjsfvTPTwvRT+870bkf0jn2nTzCZ3doBE7kKMQu0yHOry2Pvo8V8hmCw8wLFb\n"\
-"vsIOACGnBM7vlZ64NRVt5Dq+29Cu/DeWeaU28BECgYEAiFuITGDbtSnYwnvAK8Fa\n"\
-"Zm0k0kINvlnCeuY8SBe/w+dxcnf/C5BZF/EQLsadkj6HtdPeuLW6XZZ+u6iH342+\n"\
-"qSYIq8XCALYHYFhj3MBSOS9wM7pZai/7iHh8jBUvAPFPP0BzbPvsk3u2yNdEviXV\n"\
-"iKKXhIP9Uu5UmEcP2zwdw80CgYBgSRDAOYyDMYqvmlFaio3L9IzumF9IdUqOysp8\n"\
-"bgH4R69qTa3C17dEVSLYwITsSntLFw/6zEJlSlZq1YnzOvI/XPWv5/7Bx5O5+K4Q\n"\
-"Y+ItZjFBHeaPZspO+zG5MMi95mLSkYKQlSkAOSSVMuxOG1EE7h3EgcXzTz3Scpw2\n"\
-"COK88QKBgQClG5+DJwSiI69nb3ctZzE1MbUBSiaHnHyyGTvgmp1dcQmF3z1w5fUJ\n"\
-"mZZ2OPcbdzFlnpU1USqP067vNHATCMs0OZ9E8fQqyzNyscYHgG0LHxb26C9hcad7\n"\
-"pxUG6jOmqnvIEHWQI1U043jJ84HsO8KmL5dFqFh+hyrJilivaHUj2g==\n"\
-"-----END RSA PRIVATE KEY-----\n";
-    
-    char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
-"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuaSs3J+sdyTWIGiYOuWe\n"\
-"PVjbJoI42eUzHrJpAuVhwaHsVREKdFSYG4LP7SdFLtAQxSDQYBqwe5gLfJk/E89j\n"\
-"cWnhDL5Kqnz4ihyfyk31zJxEdzjxccs7LTiXY5IuFPsOpxZJjf5xPIopqjiBcbxi\n"\
-"+/+jTWfG5xT8gh8PbqpRnVi5/qQqD/4tXkCXeNsJ4yJSFOymhmTieclXkDakPzQJ\n"\
-"2jLnBUA0pEeDBoeVMKLsib+FPdC6BN/hVT4n56xvln7J1tbtMM/ujT1mH/KKndgA\n"\
-"xqd8R5PZRhudSQGNg6UrhmlsmS1OUdmB+/9eOHVGeLeIZHNcHyc9n5OQ+W7CpZ0p\n"\
-"+wIDAQAB\n"\
-"-----END PUBLIC KEY-----\n";
-
     unsigned char  encrypted[4098]={};
     unsigned char decrypted[4098]={};
     int sockid;
@@ -200,11 +172,16 @@ int command_handler(char * command,int sockid, int client_socket)
             printf("Connection shutdown\n");
             handleError(sockid);
         }
-        int lenght = private_decrypt((unsigned char *)buffer, 256, privateKey, decrypted);
+        int lenght = private_decrypt(buffer, 256, privateKey, decrypted);
+        if (lenght == -1) 
+        {
+            printf("Error during encryption\n");
+        }
+        else 
+        {
+            printf("%s\n", decrypted);
+        }
 
-        printf("%d\n", lenght);
-        printf("%s\n", buffer);
-        printf("%s\n", decrypted);
     }
     else if (strncmp(command,"dec",3) == 0)
     {
