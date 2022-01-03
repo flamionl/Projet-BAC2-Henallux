@@ -166,4 +166,3 @@ int decrypt(unsigned char *key, unsigned char *iv, char *cipher_file)
     return 0;
 }
 
-
