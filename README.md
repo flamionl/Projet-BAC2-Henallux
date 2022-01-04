@@ -1,2 +1,1 @@
-Projet-BAC2-Henallux
-Ce projet est à but purement éducatif 
+Ransomware Linux  conçu dans le cadre d'un projet scolaire 

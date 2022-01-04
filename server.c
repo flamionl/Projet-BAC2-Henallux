@@ -286,12 +286,6 @@ RSA * createRSA(unsigned char * key,int public)
     return rsa;
 }
 
-int public_encrypt(unsigned char * data,int data_len,unsigned char * key, unsigned char *encrypted)
-{
-    RSA * rsa = createRSA(key,1);
-    int result = RSA_public_encrypt(data_len,data,encrypted,rsa,padding);
-    return result;
-}
 
 int private_decrypt(unsigned char * enc_data,int data_len,unsigned char * key, unsigned char *decrypted)
 {
